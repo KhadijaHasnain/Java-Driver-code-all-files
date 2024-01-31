@@ -1,0 +1,10 @@
+// Note - in Java and Python all methods are virtual so "virtual" keyword can be disregarded
+
+class HashInterface< Key, Value > 
+
+   public
+
+	virtual Value* get( constant Key& key ) constant   	    	// returns null if not found
+	virtual void   put( constant Key& key, constant Value& value )
+	virtual int    getCollisions() constant
+	virtual        destructor()					// C++ only

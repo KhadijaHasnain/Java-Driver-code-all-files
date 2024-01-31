@@ -1,0 +1,140 @@
+/*
+ * LinearProbingHash
+ *
+ *  Created on: Feb 13, 2018
+ *      Author: Kamilla Murashkina
+ *  edited Feb 03, 2023
+ */
+
+// You can assume that values are not changed after they are added to the hash table,
+// so there is no need to clone values
+//
+// If you are comfortable with it, write a generic (template) class. Otherwise just 
+// write a class that works with int or Integer keys and values.
+//
+// If you are comfortable with it, write the class that is extending or
+// implementing HashInterface (note that the driver pseudocode uses HashInterface).
+// To make the code less redundant, you can also write HashBase class and move 
+// all functions except lookup there.
+//
+// Some languages do not require to specify variable/function types but you 
+// shall specify types (or hints) if possible.
+//
+// If the language requires it, use int where plain number is enough and use 
+// a pointer to int or Integer type where the value can be a number or the null. 
+//
+// If you can, make Record class nested, otherwise write it on the top level.
+//
+// Use const or final instead of constant keyword if the language supports it. Otherwise 
+// diregard (omit) it.
+//
+// In some languages (like Java and Python), all methods are virtual so virtual keyword 
+// can be disregarded.
+//
+// & and * in variable definitions are C++ specific hints. Disregard them
+// if using other languages.
+//
+// p.key and p.value are generalized expressions. In the case of C++, you may need 
+// to write p->key and p->value instead, if p is a pointer. 
+//
+// In p.key EQUAL key, you must use language specific comparison that compares
+// keys data, not just references. For example, in the case of Java Integer type,
+// p.key == key compares two references and so cannot be used.
+//
+// Some languages do not have null keyword and so you need to replace it appropriately.
+// For example, use nullptr in C++.
+//
+// Some languages have vectors. If not, replace vector with an appropriate array type.
+
+class LinearProbingHash<Key,Value> implements HashInterface<Key,Value>
+
+    private
+
+	class Record	
+	
+	    public
+
+		Key   key
+		Value value
+
+		constructor( constant Key& key1, constant Value& value1 )
+		
+			key   = key1
+			value = value1
+
+	endclass /* Record */
+
+	vector<Record*>* table		// vector or array type
+        int 	 	 collisions
+
+	static int hash( constant Key& key )
+
+		// scramble the key via bitwise operations
+		// for simplicity, it is assumed that Key is some kind of number
+
+		return (key>>8)|((key&0xff)<<16)
+
+	int hashIndex( constant Key& key ) constant
+
+		constant int index = hash(key)	// do not use native hash function here
+		return index % table.size()
+
+	int lookUp( constant Key& key ) constant
+
+		constant int startIndex = hashIndex(key);
+		int          index      = startIndex;
+
+		while (true)
+	
+			Record *constant p = table[index];
+			if ( p == null || p.key EQUAL key )
+				return index
+	
+			collisions += 1
+			index	   += 1
+			index      %= table.size()
+
+			if (index == startIndex)				
+				return table.size()+1
+		endwhile
+
+   public
+
+	LinearProbingHash( int initialSize = 191 ) // constructor
+	
+		table      = new vector<Record*>[initialSize]
+		collisions = 0
+
+	virtual Value* get( constant Key& key ) constant // returns null if not found
+
+		constant int index = lookUp(key)
+		if(index>table.size()) return null
+
+		Record* p = table[index]
+		return p ? p.value : null	// &(p.value) in C++	
+
+	virtual void put( constant Key& key, constant Value& value )
+
+		constant int index = lookUp(key)
+		if (index>table.size()) throw runtime_error("Table is full")
+
+		Record* p = table[index]
+		if ( p == null )
+	
+			table[index] = new Record(key, value)
+		else
+			p.value = value
+		endif
+
+	virtual int getCollisions() constant
+
+		return collisions
+
+        virtual void printTable()
+
+	virtual destructor()	// C++ only
+
+		for ( constant p: table ) delete p
+		delete[] table 
+	
+
